@@ -1,13 +1,21 @@
-const Max = require("max-api");
 const wifi = require("node-wifi");
+let max;
+try {
+  max = require("max-api");
+} catch (e) {
+  console.log(`can't load max api`);
+  max = {
+    post(...mess) {
+      console.log(`[max.post] `, ...mess);
+    },
+    outlet(...data) {
+      console.log(`[max.outlet] `, ...data);
+    },
+    addHandler() {}
+  };
+}
 
-Max.post(`Loaded script: '${__filename}'`);
-
-// Max.addHandler("bang", () => {
-//   Max.post("got a bang!");
-// });
-
-// Max.outlet
+max.post(`Loaded script: '${__filename}'`);
 
 wifi.init({ iface: null });
 
@@ -17,25 +25,24 @@ async function scan() {
   const networks = await wifi.scan();
   return networks
     .filter(n => n.ssid)
-    .map(({ ssid, signal_level }) => [ssid, parseInt(signal_level) + 100])
+    .map(({ ssid, signal_level }) => [ssid, signal_level + 100])
     .sort((a, b) => b[1] - a[1]);
 }
 
 function startScanning(interval = 10000) {
   scan().then(networks =>
-    networks.forEach(([ssid, level]) => Max.post(`${ssid} - ${level}`))
+    networks.forEach(([ssid, level]) => max.post(`${ssid} - ${level}`))
   );
 
   timer = setInterval(async () => {
-    Max.post("scanning...");
+    max.post("scanning...");
     const networks = await scan();
-    // networks.forEach(([ssid, level]) => Max.post(`${ssid} - ${level}`));
-    networks.forEach(([ssid, level]) => Max.outlet(ssid, level));
+    networks.forEach(([ssid, level]) => max.outlet(ssid, level));
   }, interval);
 }
 
-Max.addHandler("startScanning", interval => {
-  Max.post("initializing scanning...");
+max.addHandler("startScanning", interval => {
+  max.post("initializing scanning...");
   const i = parseInt(interval);
   if (!isNaN(i)) {
     startScanning(i);
@@ -44,7 +51,7 @@ Max.addHandler("startScanning", interval => {
   }
 });
 
-Max.addHandler("stopScanning", () => {
-  Max.post("ending scanning...");
+max.addHandler("stopScanning", () => {
+  max.post("ending scanning...");
   clearInterval(timer);
 });
