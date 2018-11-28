@@ -2,8 +2,8 @@
 	"name" : "Bell",
 	"version" : 1,
 	"creationdate" : 3626205872,
-	"modificationdate" : 3626212837,
-	"viewrect" : [ -397.0, 741.0, 300.0, 500.0 ],
+	"modificationdate" : 3626265532,
+	"viewrect" : [ 299.0, 203.0, 300.0, 500.0 ],
 	"autoorganize" : 1,
 	"hideprojectwindow" : 0,
 	"showdependencies" : 1,
@@ -42,8 +42,13 @@
 ,
 			"Full1-node.maxpat" : 			{
 				"kind" : "patcher",
-				"local" : 1
+				"local" : 1,
+				"toplevel" : 1
 			}
+
+		}
+,
+		"code" : 		{
 
 		}
 
