@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bit-buffer": "^0.2.4",
     "node-wifi": "^2.0.4"
   },
   "devDependencies": {

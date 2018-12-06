@@ -1,5 +1,6 @@
 const wifi = require("node-wifi");
 const max = require("./max-api");
+const { BitStream } = require("bit-buffer");
 
 const REMOVED_DECAY_RATE = 0.6;
 const DEFAULT_SCAN_INTERVAL = 6000;
@@ -33,14 +34,16 @@ async function scan() {
       };
     });
 
-  // First, unflag any networks flagged to remove if they came back.
   for (const [ssid, obj] of Object.entries(state)) {
     if (ssid in networkList) {
       obj.level = networkList[ssid].level;
-      obj.removed = false;
+      if (obj.removed) {
+        max.post(`re-found network: ${ssid}`);
+        obj.removed = false;
+      }
     } else {
       if (!obj.removed) {
-        max.post(`removing network: ${ssid}`);
+        max.post(`lost network: ${ssid}`);
         obj.removed = true;
       }
     }
@@ -51,18 +54,26 @@ async function scan() {
   );
 
   for (const added of addedNetworks) {
-    max.post(`adding network: ${added}`);
+    max.post(`found new network: ${added}`);
+
+    /** @type {string} */
+    const mac = networkList[added].mac;
+    const bytes = mac.split(":").map(byte => parseInt(byte, 16));
+
+    const stream = new BitStream(new Uint8Array(bytes).buffer);
+
+    const notes = [
+      [stream.readBits(4), stream.readBits(4)],
+      [stream.readBits(4), stream.readBits(4)],
+      [stream.readBits(4), stream.readBits(4)],
+      [stream.readBits(4), stream.readBits(4)],
+      [stream.readBits(4), stream.readBits(4)],
+      [stream.readBits(4), stream.readBits(4)]
+    ];
+
     state[added] = {
       ...networkList[added],
-      notes: [
-        // TODO: bitbuffer to pick notes
-        [randomInt(0, 16), randomInt(0, 16)],
-        [randomInt(0, 16), randomInt(0, 16)],
-        [randomInt(0, 16), randomInt(0, 16)],
-        [randomInt(0, 16), randomInt(0, 16)],
-        [randomInt(0, 16), randomInt(0, 16)],
-        [randomInt(0, 16), randomInt(0, 16)]
-      ],
+      notes,
       note: 0,
       volume: 0,
       removed: false
@@ -74,7 +85,6 @@ function beat() {
   const toRemove = [];
 
   // TODO: don't slice...? figure out a way to play everything...?
-  // for (const [ssid, obj] of Object.entries(state)) {
   let i = -1;
   for (const [ssid, obj] of Object.entries(state).slice(0, 2)) {
     i += 1;
@@ -86,7 +96,10 @@ function beat() {
         const time = randomInt(0, 30) + i * 100;
 
         setTimeout(() => {
-          max.outlet(note, obj.volume * obj.level);
+          max.outlet(
+            note,
+            obj.volume * obj.level + (Math.random() - 0.5) * 0.05
+          );
         }, time);
       }
     }
