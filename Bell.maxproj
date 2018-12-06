@@ -2,8 +2,8 @@
 	"name" : "Bell",
 	"version" : 1,
 	"creationdate" : 3626205872,
-	"modificationdate" : 3626274839,
-	"viewrect" : [ 468.0, 175.0, 300.0, 500.0 ],
+	"modificationdate" : 3626908205,
+	"viewrect" : [ -762.0, 714.0, 300.0, 500.0 ],
 	"autoorganize" : 1,
 	"hideprojectwindow" : 0,
 	"showdependencies" : 1,
@@ -35,17 +35,6 @@
 				"local" : 1
 			}
 ,
-			"Full1.maxpat" : 			{
-				"kind" : "patcher",
-				"local" : 1
-			}
-,
-			"Full1-node.maxpat" : 			{
-				"kind" : "patcher",
-				"local" : 1,
-				"toplevel" : 1
-			}
-,
 			"Full1-PolyCompat.maxpat" : 			{
 				"kind" : "patcher",
 				"local" : 1
@@ -53,12 +42,8 @@
 ,
 			"Poly-node.maxpat" : 			{
 				"kind" : "patcher",
-				"local" : 1
-			}
-,
-			"HandleWifi.maxpat" : 			{
-				"kind" : "patcher",
-				"local" : 1
+				"local" : 1,
+				"toplevel" : 1
 			}
 
 		}
