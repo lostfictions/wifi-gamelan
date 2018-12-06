@@ -24,21 +24,25 @@ async function scan() {
   const networks = await wifi.scan();
   const networkList = {};
   networks
-    .filter(n => n.ssid && n.mac)
+    .filter(n => n.ssid && n.ssid.trim().length > 0 && n.mac)
+    .sort((a, b) => b.signal_level - a.signal_level)
     .forEach(n => {
       networkList[n.ssid] = {
         mac: n.mac,
-        level: n.signal_level + 100
+        level: (n.signal_level + 100) / 100
       };
     });
 
   // First, unflag any networks flagged to remove if they came back.
-  for (const [ssid, obj] of Object.entries(obj)) {
+  for (const [ssid, obj] of Object.entries(state)) {
     if (ssid in networkList) {
+      obj.level = networkList[ssid].level;
       obj.removed = false;
     } else {
-      max.post(`removing network: ${ssid}`);
-      obj.removed = true;
+      if (!obj.removed) {
+        max.post(`removing network: ${ssid}`);
+        obj.removed = true;
+      }
     }
   }
 
@@ -51,6 +55,7 @@ async function scan() {
     state[added] = {
       ...networkList[added],
       notes: [
+        // TODO: bitbuffer to pick notes
         [randomInt(0, 16), randomInt(0, 16)],
         [randomInt(0, 16), randomInt(0, 16)],
         [randomInt(0, 16), randomInt(0, 16)],
@@ -68,15 +73,21 @@ async function scan() {
 function beat() {
   const toRemove = [];
 
-  for (const [ssid, obj] of Object.entries(state)) {
+  // TODO: don't slice...? figure out a way to play everything...?
+  // for (const [ssid, obj] of Object.entries(state)) {
+  let i = -1;
+  for (const [ssid, obj] of Object.entries(state).slice(0, 2)) {
+    i += 1;
     const currentNotes = obj.notes[obj.note];
     for (const note of currentNotes) {
-      // notes 11-15 are silence!
-      if (note < 11) {
+      // notes 10-15 are silence!
+      if (note < 10) {
         // Slight random delay to humanize!
+        const time = randomInt(0, 30) + i * 100;
+
         setTimeout(() => {
-          max.outlet(note, obj.volume);
-        }, randomInt(0, 30));
+          max.outlet(note, obj.volume * obj.level);
+        }, time);
       }
     }
 
