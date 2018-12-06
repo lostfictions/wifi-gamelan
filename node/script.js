@@ -1,19 +1,5 @@
 const wifi = require("node-wifi");
-let max;
-try {
-  max = require("max-api");
-} catch (e) {
-  console.log(`can't load max api`);
-  max = {
-    post(...mess) {
-      console.log(`[max.post] `, ...mess);
-    },
-    outlet(...data) {
-      console.log(`[max.outlet] `, ...data);
-    },
-    addHandler() {}
-  };
-}
+const max = require("./max-api");
 
 max.post(`Loaded script: '${__filename}'`);
 
