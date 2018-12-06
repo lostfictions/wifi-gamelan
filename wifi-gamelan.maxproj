@@ -1,5 +1,5 @@
 {
-	"name" : "Bell",
+	"name" : "wifi-gamelan",
 	"version" : 1,
 	"creationdate" : 3626205872,
 	"modificationdate" : 3626908205,
